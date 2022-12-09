@@ -3,19 +3,13 @@ import datetime
 from pathlib import Path
 from game_rl.utils import MetricLogger
 from game_rl.strategy import Mario
-from gym.wrappers import FrameStack
 import gym_super_mario_bros
 import gym
-from nes_py.wrappers import JoypadSpace
 from game_rl.wrappers import *
 
 env = gym_super_mario_bros.make("SuperMarioBros-1-1-v0", apply_api_compatibility=True)
 
-env = JoypadSpace(env, [["right"], ["right", "A"]])
-env = SkipFrame(env, skip=4)
-env = GrayScaleObservation(env)
-env = ResizeObservation(env, shape=84)
-env = FrameStack(env, num_stack=4)
+env = create_env(env, skip=4, shape=84, num_stack=4)
 
 use_cuda = torch.cuda.is_available()
 print(f"Using CUDA: {use_cuda}")
