@@ -10,11 +10,11 @@ class Mario():
     """
     Agent for Super Marios Bro Game
     """
-    def __init__(self, state_dim, action_dim, save_dir):
+    def __init__(self, state_dim, action_dim, save_dir, bias_action=None):
         self.state_dim = state_dim
         self.action_dim = action_dim
         self.save_dir = save_dir
-
+        self.bias_action = bias_action
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
         # Agents's DNN to predict the most optimal action - we implement this in the Learn section
@@ -49,7 +49,10 @@ class Mario():
         """
         # EXPLORE
         if np.random.rand() < self.exploration_rate:
-            action_idx = np.random.randint(self.action_dim)
+            if self.bias_action:
+                action_idx = self.bias_action
+            else:
+                action_idx = np.random.randint(self.action_dim)
 
         # EXPLOIT
         else:
@@ -177,3 +180,8 @@ class Mario():
         loss = self.update_Q_online(td_est, td_tgt)
 
         return (td_est.mean().item(), loss)
+    
+    def load(self, path):
+        save_dict = torch.load(path)
+        self.exploration_rate = save_dict["exploration_rate"]
+        self.net.load_state_dict(save_dict["model"])

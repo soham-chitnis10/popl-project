@@ -9,7 +9,7 @@ import gym
 from nes_py.wrappers import JoypadSpace
 from game_rl.wrappers import *
 
-env = gym_super_mario_bros.make("SuperMarioBros-1-1-v0", render_mode='human', apply_api_compatibility=True)
+env = gym_super_mario_bros.make("SuperMarioBros-1-1-v0", apply_api_compatibility=True)
 
 env = JoypadSpace(env, [["right"], ["right", "A"]])
 env = SkipFrame(env, skip=4)
@@ -24,18 +24,18 @@ print()
 save_dir = Path("checkpoints") / datetime.datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
 save_dir.mkdir(parents=True)
 
-mario = Mario(state_dim=(4, 84, 84), action_dim=env.action_space.n, save_dir=save_dir)
+mario = Mario(state_dim=(4, 84, 84), action_dim=env.action_space.n, save_dir=save_dir, bias_action=None)
 
 logger = MetricLogger(save_dir)
 
-episodes = 10
+episodes = 10000
 for e in range(episodes):
 
     state = env.reset()
     # Play the game!
     while True:
         # Render Mario environment
-        env.render()
+        # env.render()
         # Run agent on the state
         action = mario.act(state)
         
@@ -59,6 +59,6 @@ for e in range(episodes):
             break
 
     logger.log_episode()
-
+    mario.save()
     
     logger.record(episode=e, epsilon=mario.exploration_rate, step=mario.curr_step)
